@@ -17,9 +17,7 @@ async Task Main()
 
 	await Task.Run(async () => {
 		await Task.Delay(1000);
-		"completing".Dump();
+		"completing".Dump("ctrl-shift-f5 to kill threads if it's still running.");
 		cts.Cancel();
 	});
 }
-
-// Define other methods and classes here
