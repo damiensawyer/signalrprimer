@@ -25,7 +25,7 @@ async Task Main()
 	};
 
 	await Task.Factory.StartNew(() => {mainLoop(cts.Token);},
-		cts.Token, 
+		cts.Token, // I'm not sure what passing this achieves
 		TaskCreationOptions.LongRunning, 
 		TaskScheduler.Default);
 
