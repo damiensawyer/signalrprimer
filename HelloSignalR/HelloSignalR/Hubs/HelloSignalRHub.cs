@@ -11,17 +11,12 @@ namespace HelloSignalR.Hubs
     public class HelloSignalRHub : Hub
     {
         private readonly Guid _key;
-        private bool cancelled;
-        private TaskCompletionSource<bool> c2;
-        private CancellationTokenSource _cts;
+        private readonly CancellationTokenSource _cts;
 
         public HelloSignalRHub()
         {
             this._key = Guid.NewGuid();
-
-            // Newer way to set up infinte loop. Can be cancelled.
-
-            this._cts = new CancellationTokenSource(); // call .cancel() to kill
+            this._cts = new CancellationTokenSource();
         }
 
         public void SendPulse(int counter)
@@ -30,34 +25,12 @@ namespace HelloSignalR.Hubs
         }
         public void Stop()
         {
-            this._cts.Cancel();
+            this._cts.Cancel(true);
         }
 
         public override Task OnConnected()
         {
-            //Task.Run(async () =>
-            //{
-            //    var i = 0;
-            //    try
-            //    {
-            //        while (!this.cancelled)
-            //        {
-            //                this._cts.Token.ThrowIfCancellationRequested(); // didn't work.... :-(
-            //                if (this._cts.Token.IsCancellationRequested)
-            //                {
-            //                    this.cancelled = true;
-            //                }
-            //            this.SendPulse(i += 10);
-            //            await Task.Delay(2000, _cts.Token); // not executed by the thread pool
-            //        }
-            //    }
-            //    catch (TaskCanceledException)
-            //    {
-            //        // ??
-            //    }
-            //});
-
-            // Other way to set up infinate loop.
+            // set up infinate loop that can be cancelled
             Task.Factory.StartNew(async () =>
             {
                 var i = 0; // I think that each client that connects gets their own instance of this hub... therefore this value isn't shared. Need to use a common service
@@ -66,7 +39,7 @@ namespace HelloSignalR.Hubs
                     this.SendPulse(i++);
                     await Task.Delay(2000);
                 }
-            }, this._cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
+            }, this._cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
             return base.OnConnected();
         }
 
