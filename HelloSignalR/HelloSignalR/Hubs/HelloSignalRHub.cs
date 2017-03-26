@@ -11,7 +11,9 @@ namespace HelloSignalR.Hubs
     public class HelloSignalRHub : Hub
     {
         private readonly Guid _key;
-        private readonly CancellationTokenSource _cts;
+        private bool cancelled;
+        private TaskCompletionSource<bool> c2;
+        private CancellationTokenSource _cts;
 
         public HelloSignalRHub()
         {
@@ -20,35 +22,6 @@ namespace HelloSignalR.Hubs
             // Newer way to set up infinte loop. Can be cancelled.
 
             this._cts = new CancellationTokenSource(); // call .cancel() to kill
-            Task.Run(async () =>
-            {
-                var i = 0;
-                var cancelled = false;
-                try
-                {
-                    while (!cancelled)
-                    {
-                        _cts.Token.ThrowIfCancellationRequested();
-                        this.SendPulse(i += 10);
-                        await Task.Delay(500, _cts.Token); // not executed by the thread pool
-                    }
-                }
-                catch (TaskCanceledException)
-                {
-                    cancelled = true;
-                }
-            });
-
-            //// Other way to set up infinate loop.
-            //Task.Factory.StartNew(async () =>
-            //{
-            //    var i = 0; // I think that each client that connects gets their own instance of this hub... therefore this value isn't shared. Need to use a common service
-            //    while (true)
-            //    {
-            //        this.SendPulse(i++);
-            //        await Task.Delay(2000);
-            //    }
-            //}, TaskCreationOptions.LongRunning);
         }
 
         public void SendPulse(int counter)
@@ -62,6 +35,38 @@ namespace HelloSignalR.Hubs
 
         public override Task OnConnected()
         {
+            //Task.Run(async () =>
+            //{
+            //    var i = 0;
+            //    try
+            //    {
+            //        while (!this.cancelled)
+            //        {
+            //                this._cts.Token.ThrowIfCancellationRequested(); // didn't work.... :-(
+            //                if (this._cts.Token.IsCancellationRequested)
+            //                {
+            //                    this.cancelled = true;
+            //                }
+            //            this.SendPulse(i += 10);
+            //            await Task.Delay(2000, _cts.Token); // not executed by the thread pool
+            //        }
+            //    }
+            //    catch (TaskCanceledException)
+            //    {
+            //        // ??
+            //    }
+            //});
+
+            // Other way to set up infinate loop.
+            Task.Factory.StartNew(async () =>
+            {
+                var i = 0; // I think that each client that connects gets their own instance of this hub... therefore this value isn't shared. Need to use a common service
+                while (true)
+                {
+                    this.SendPulse(i++);
+                    await Task.Delay(2000);
+                }
+            }, this._cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Default);
             return base.OnConnected();
         }
 
