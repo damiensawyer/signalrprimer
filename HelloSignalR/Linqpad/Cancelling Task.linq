@@ -5,19 +5,33 @@
 async Task Main()
 {
 	var cts = new CancellationTokenSource();
-	await Task.Factory.StartNew(async () =>
+
+	Action<CancellationToken> mainLoop = async (t) =>
+	{
+		var i = 0;
+		try
+		{
+			while (true)
 			{
-				var i = 0;
-				while (true)
-				{
-					i++.Dump();
-					await Task.Delay(300);
-				}
-			}, cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+				t.ThrowIfCancellationRequested();
+				i++.Dump();
+				await Task.Delay(300);
+			}
+		}
+		catch (OperationCanceledException ex)
+		{
+			ex.Message.Dump("cancelled");
+		}
+	};
+
+	await Task.Factory.StartNew(() => {mainLoop(cts.Token);},
+		cts.Token, 
+		TaskCreationOptions.LongRunning, 
+		TaskScheduler.Default);
 
 	await Task.Run(async () => {
 		await Task.Delay(1000);
-		"completing".Dump("ctrl-shift-f5 to kill threads if it's still running.");
+		"completing".Dump();
 		cts.Cancel();
 	});
 }
