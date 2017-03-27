@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,12 +13,13 @@ namespace HelloSignalR.Hubs
     public class HelloSignalRHub : Hub
     {
         private readonly Guid _key;
-        private readonly CancellationTokenSource _cts;
+        private CancellationTokenSource _cts;
+        static ConcurrentDictionary<string, CancellationTokenSource> cancelTokens = new ConcurrentDictionary<string, CancellationTokenSource>();
 
         public HelloSignalRHub()
         {
             this._key = Guid.NewGuid();
-            this._cts = new CancellationTokenSource();
+
         }
 
         public void SendPulse(int counter)
@@ -25,27 +28,51 @@ namespace HelloSignalR.Hubs
         }
         public void Stop()
         {
-            this._cts.Cancel(true);
+            this.KillCounter(Context.ConnectionId);
         }
 
-        public override Task OnConnected()
+        public override async Task OnConnected()
         {
+            var connectionId = Context.ConnectionId;
+            var cts = new CancellationTokenSource();
             // set up infinate loop that can be cancelled
-            Task.Factory.StartNew(async () =>
+            cancelTokens.TryAdd(connectionId, cts);
+            Action<CancellationToken> mainLoop = async (t) =>
             {
-                var i = 0; // I think that each client that connects gets their own instance of this hub... therefore this value isn't shared. Need to use a common service
-                while (true)
+                var i = 0;
+                try
                 {
-                    this.SendPulse(i++);
-                    await Task.Delay(2000);
+                    while (true)
+                    {
+                        t.ThrowIfCancellationRequested();
+                        this.SendPulse(i++);
+                        await Task.Delay(2000, t);
+                    }
                 }
-            }, this._cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
-            return base.OnConnected();
+                catch (OperationCanceledException ex)
+                {
+                    Debug.WriteLine(ex.Message);
+                }
+            };
+            await base.OnConnected();
+            await Task.Run(() => mainLoop(cts.Token), cts.Token);
+            //Task.Factory.StartNew(()=>mainLoop(this._cts.Token), this._cts.Token, TaskCreationOptions.LongRunning, TaskScheduler.Current);
+        }
+
+        private void KillCounter(string connectionId)
+        {
+            if (cancelTokens.ContainsKey(connectionId))
+            {
+                cancelTokens[connectionId].Cancel();
+                CancellationTokenSource result;
+                cancelTokens.TryRemove(connectionId, out result);
+            }
         }
 
         public override Task OnDisconnected(bool stopCalled)
         {
-            this._cts.Cancel();
+            this.KillCounter(Context.ConnectionId);
+
             return base.OnDisconnected(stopCalled);
         }
     }

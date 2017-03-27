@@ -24,12 +24,15 @@ async Task Main()
 		}
 	};
 
-	await Task.Factory.StartNew(() => {mainLoop(cts.Token);},
-		cts.Token, // What this achieves - http://stackoverflow.com/a/36135223/494635
-		TaskCreationOptions.LongRunning, 
-		TaskScheduler.Default);
+	await Task.Run(() => mainLoop(cts.Token), cts.Token); // why to pass a token. Also says not to use StartNew without a Scheduler -- What this achieves - http://stackoverflow.com/a/36135223/494635
 
-	await Task.Run(async () => {
+	//	await Task.Factory.StartNew(() => {mainLoop(cts.Token);},
+	//		cts.Token, // What this achieves - http://stackoverflow.com/a/36135223/494635
+	//		TaskCreationOptions.LongRunning, 
+	//		TaskScheduler.Default);
+
+	await Task.Run(async () =>
+	{
 		await Task.Delay(1000);
 		"completing".Dump();
 		cts.Cancel();
