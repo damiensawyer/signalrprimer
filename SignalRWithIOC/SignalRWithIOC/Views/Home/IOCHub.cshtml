@@ -16,7 +16,7 @@
     <script type="text/javascript">
         $(function () {
             // Reference the auto-generated proxy for the hub.
-            var connection = $.connection.second_CommonServiceHub;
+            var connection = $.connection.iOCHub;
 
             var Model = function () {
                 var self = this;
@@ -36,8 +36,13 @@
             var model = new Model();
             connection.client.Pulse = function (pulse) { this.result(pulse);}.bind(model);
             $.connection.hub.logging = true;
+
             $.connection.hub.start().done(function () {
                 console.log('connected to SignalR');
+                var r = connection.server.getName();
+                r.done(function(result) {
+                     this.result(result);
+                }.bind(model));
             });
 
 
@@ -50,12 +55,9 @@
 </head>
 <body>
     @Html.Partial("~/Views/Shared/Navigation.cshtml")
-    <h2>Common Service (shared by hubs)</h2>
+    <h2>Hub with IOC</h2>
     <div>
         <strong>Value from server <span data-bind="text:result"></span></strong>
-        <div> <button data-bind="click:stop">Stop Server Counter</button>
-            <button data-bind="click:restart">Restart Server Counter</button>
-        </div>
     </div>
 </body>
 </html>

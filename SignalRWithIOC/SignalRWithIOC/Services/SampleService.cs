@@ -14,7 +14,7 @@ namespace HelloSignalR.Services
         private readonly IHubContext _context;
 
         private static readonly Lazy<SampleService> _instance = new Lazy<SampleService>(
-    () => new SampleService(GlobalHost.ConnectionManager.GetHubContext<Second_CommonServiceHub>()));
+    () => new SampleService(GlobalHost.ConnectionManager.GetHubContext<IOCHub>()));
 
         private int i = 0;
         private IList<int> _history = new List<int>();
