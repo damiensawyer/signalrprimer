@@ -1,0 +1,54 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Home</title>
+    <script src="~/Scripts/knockout-3.4.2.js"></script>
+    <script src="~/Scripts/jquery-1.6.4.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.1.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            // Reference the auto-generated proxy for the hub.
+            var connection = $.connection.helloSignalRHub;
+            connection.client.Pulse = function (pulse, key) { console.log('server message received', pulse, key) };
+            $.connection.hub.logging = true;
+            $.connection.hub.start().done(function() {
+                console.log('connected to SignalR');
+            });
+
+            var Model = function () {
+                var self = this;
+                self.clientKey = ko.observable(''); // generated on server
+            }
+
+            Model.prototype = {
+                cancel: function () {
+                    console.log('stop requested');
+                    connection.server.stop();
+                }.bind(this)
+            };
+
+            $(function () {
+                var model = new Model();
+                ko.applyBindings(model);
+            });
+
+        });
+
+    </script>
+
+</head>
+<body>
+    <div>
+        See console for output.
+        <button data-bind="click:cancel">Stop Receiving Counter from Server</button>
+    </div>
+</body>
+</html>
