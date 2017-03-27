@@ -11,15 +11,15 @@ namespace HelloSignalR.Hubs
     /// 
     /// I haven't set up any client code to consume this service.... or tested it for that matter!!
     /// </summary>
-    public class Second_CommonService : Hub
+    public class Second_CommonServiceHub : Hub
     {
         private readonly SampleService _sampleService;
 
-        public Second_CommonService() : this(SampleService.Instance) // this will kick off the service which is Lazy
+        public Second_CommonServiceHub() : this(SampleService.Instance) // this will kick off the service which is Lazy
         {
         }
 
-        Second_CommonService(SampleService sampleService)
+        Second_CommonServiceHub(SampleService sampleService)
         {
             this._sampleService = sampleService;
         }

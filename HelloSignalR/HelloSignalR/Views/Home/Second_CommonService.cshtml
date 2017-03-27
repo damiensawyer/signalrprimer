@@ -1,0 +1,61 @@
+﻿@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>Common Service</title>
+    <script src="~/Scripts/knockout-3.4.2.js"></script>
+    <script src="~/Scripts/jquery-1.6.4.min.js"></script>
+    <script src="~/Scripts/jquery.signalR-2.2.1.min.js"></script>
+    <script src="~/signalr/hubs"></script>
+
+    <script type="text/javascript">
+        $(function () {
+            // Reference the auto-generated proxy for the hub.
+            var connection = $.connection.second_CommonServiceHub;
+
+            var Model = function () {
+                var self = this;
+                self.result = ko.observable('');
+            }
+
+            Model.prototype = {
+                stop: function () {
+                    console.log('stop requested');
+                    connection.server.stopTimer();
+                }.bind(this),
+                restart: function () {
+                    console.log('restart requested');
+                    connection.server.restartTimer();
+                }.bind(this)
+            };
+            var model = new Model();
+            connection.client.Pulse = function (pulse) { this.result(pulse);}.bind(model);
+            $.connection.hub.logging = true;
+            $.connection.hub.start().done(function () {
+                console.log('connected to SignalR');
+            });
+
+
+            ko.applyBindings(model);
+
+        });
+
+    </script>
+
+</head>
+<body>
+    @Html.Partial("~/Views/Shared/Navigation.cshtml")
+    <h2>Common Service (shared by hubs)</h2>
+    <div>
+        <strong>Value from server <span data-bind="text:result"></span></strong>
+        <div> <button data-bind="click:stop">Stop Server Counter</button>
+            <button data-bind="click:restart">Restart Server Counter</button>
+        </div>
+    </div>
+</body>
+</html>

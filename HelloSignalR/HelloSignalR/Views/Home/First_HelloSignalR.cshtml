@@ -7,7 +7,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width" />
-    <title>Home</title>
+    <title>Hello Signal R</title>
     <script src="~/Scripts/knockout-3.4.2.js"></script>
     <script src="~/Scripts/jquery-1.6.4.min.js"></script>
     <script src="~/Scripts/jquery.signalR-2.2.1.min.js"></script>
@@ -16,7 +16,7 @@
     <script type="text/javascript">
         $(function () {
             // Reference the auto-generated proxy for the hub.
-            var connection = $.connection.helloSignalRHub;
+            var connection = $.connection.first_HelloSignalRHub;
             connection.client.Pulse = function (pulse, key) { console.log('server message received', pulse, key) };
             $.connection.hub.logging = true;
             $.connection.hub.start().done(function() {
@@ -46,9 +46,10 @@
 
 </head>
 <body>
-    <div>
-        See console for output.
-        <button data-bind="click:cancel">Stop Receiving Counter from Server</button>
-    </div>
+@Html.Partial("~/Views/Shared/Navigation.cshtml")
+<div>
+    See console for output.
+    <button data-bind="click:cancel">Stop Receiving Counter from Server</button>
+</div>
 </body>
 </html>

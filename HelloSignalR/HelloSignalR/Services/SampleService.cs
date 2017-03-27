@@ -14,11 +14,11 @@ namespace HelloSignalR.Services
         private readonly IHubContext _context;
 
         private static readonly Lazy<SampleService> _instance = new Lazy<SampleService>(
-    () => new SampleService(GlobalHost.ConnectionManager.GetHubContext<Second_CommonService>()));
+    () => new SampleService(GlobalHost.ConnectionManager.GetHubContext<Second_CommonServiceHub>()));
 
         private int i = 0;
         private IList<int> _history = new List<int>();
-        private CancellationTokenSource _cts;
+        private CancellationTokenSource _cts = new CancellationTokenSource();
         private bool running;
 
         public static SampleService Instance => _instance.Value;
@@ -26,6 +26,7 @@ namespace HelloSignalR.Services
         public SampleService(IHubContext context)
         {
             this._context = context;
+            StartAutoJob();
         }
 
         private Task StartAutoJob()
@@ -43,7 +44,7 @@ namespace HelloSignalR.Services
                     {
                         t.ThrowIfCancellationRequested();
                         ServerGeneratedNumber();
-                        await Task.Delay(2000, t);
+                        await Task.Delay(50, t);
                     }
                 }
                 catch (OperationCanceledException ex)
@@ -66,13 +67,13 @@ namespace HelloSignalR.Services
 
         public void StopTimer()
         {
-            if (this._cts != null && !this._cts.IsCancellationRequested)
+            if (!this._cts.IsCancellationRequested)
             this._cts.Cancel();
         }
 
         public void RestartTimer()
         {
-            if (this._cts != null && this._cts.IsCancellationRequested)
+            if (this._cts.IsCancellationRequested)
                 StartAutoJob();
         }
 
