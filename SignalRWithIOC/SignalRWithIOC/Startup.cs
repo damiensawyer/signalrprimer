@@ -51,9 +51,8 @@ namespace HelloSignalR
 
             // Attempts to get HubContexts into services... so that they can send to clients. 
             // http://stackoverflow.com/a/37913821
-            builder.Register((c, p) =>
-            //c.Resolve<Microsoft.AspNet.SignalR.IDependencyResolver>()
-            config.Resolver.Resolve<IConnectionManager>()
+            builder.Register((ctx, p) =>
+            config.Resolver.Resolve<IConnectionManager>() // this works... but wtf. Why can't I use ctx? 
                     .GetHubContext<IOCHub>())
                 .Named<IHubContext>("IOCHub");
 
@@ -67,15 +66,9 @@ namespace HelloSignalR
             var container = builder.Build();
             config.Resolver = new AutofacDependencyResolver(container); // note, this is a different AutofacDependencyResolver to the one in global.asax. Different namespace
 
-            //// Register the Autofac middleware FIRST, then the standard SignalR middleware.
-            //// This will add the Autofac middleware as well as the middleware
-            //// registered in the container - ie LoggingPipelineModule
             app.UseAutofacMiddleware(container);
-            
             app.MapSignalR("/signalr", config);
 
-            //// HOWEVER.
-            //// the Autofac Signal R doc says:
             //// To add custom HubPipeline modules, you have to get the HubPipeline
             //// from the dependency resolver, for example:
 
