@@ -23,19 +23,20 @@ namespace HelloSignalR
             //didn't get working
             // try this next? http://stackoverflow.com/a/29793864/494635
 
-            //var builder = new ContainerBuilder();
+            var builder = new ContainerBuilder();
             ////builder.RegisterType<LoggingPipelineModule>(); // see http://docs.autofac.org/en/latest/integration/owin.html for registering custom pipeline modules
             //builder.RegisterType<IOCHub>().ExternallyOwned();
-            //var config = new HubConfiguration();
+            var config = new HubConfiguration();
 
             //builder.Register(i => config.Resolver.Resolve<IConnectionManager>().GetHubContext<IOCHub>()).ExternallyOwned();
 
             //// Register your SignalR hubs.
-            //builder.RegisterType<NameService>().AsImplementedInterfaces();
-            ////builder.RegisterHubs(Assembly.GetExecutingAssembly());
+            builder.RegisterType<NameService>().SingleInstance();
+            builder.RegisterHubs(Assembly.GetExecutingAssembly());
             //// Set the dependency resolver to be Autofac.
-            //var container = builder.Build();
-            //config.Resolver = new AutofacDependencyResolver(container);
+            var container = builder.Build();
+            config.Resolver = new AutofacDependencyResolver(container);
+            //Microsoft.AspNet.SignalR. .HelloSignalR.Startup.ConfigureSignalR(app, config);
             //// OWIN SIGNALR SETUP:
 
             //// Register the Autofac middleware FIRST, then the standard SignalR middleware.
@@ -51,7 +52,7 @@ namespace HelloSignalR
             ////hubPipeline.AddModule(new LoggingPipelineModule());
             //// so - which one is it?? 
 
-            //app.MapSignalR("/signalr", config);
+            app.MapSignalR("/signalr", config);
         }
     }
 }

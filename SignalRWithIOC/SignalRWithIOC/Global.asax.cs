@@ -22,7 +22,7 @@ namespace SignalRWithIOC
             // See notes here on setting up AutoFac with SignalR
 
             var builder = new ContainerBuilder();
-            builder.RegisterType<NameService>().AsImplementedInterfaces();
+            builder.RegisterType<NameService>();
 
             // Register your SignalR hubs with Autofac
             // You can register hubs all at once using assembly scanning...
@@ -31,11 +31,11 @@ namespace SignalRWithIOC
             // this has moved to startup.cs... I think... when using OWIN
 
             // ...or you can register individual hubs manually.
-            //builder.RegisterType<IOCHub>().ExternallyOwned();
+            builder.RegisterType<IOCHub>().ExternallyOwned();
 
             // Set the dependency resolver to be Autofac.
             var container = builder.Build();
-            //GlobalHost.DependencyResolver = new AutofacDependencyResolver(container);
+            GlobalHost.DependencyResolver = new AutofacDependencyResolver(container);
             
             
             AreaRegistration.RegisterAllAreas();

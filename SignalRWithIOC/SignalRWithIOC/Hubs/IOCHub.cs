@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading.Tasks;
 using HelloSignalR.Services;
 using Microsoft.AspNet.SignalR;
@@ -9,7 +10,18 @@ namespace HelloSignalR.Hubs
     {
         private readonly NameService _nameService;
         private int i  = 0;
-        IOCHub(NameService nameService)
+
+        //public IOCHub()
+        //{
+        //    Task.Run(() =>
+        //    {
+        //        while (true)
+        //        {
+        //            this.Pulse();
+        //        }
+        //    });
+        //}
+        public IOCHub(NameService nameService)
         {
             _nameService = nameService;
 
@@ -34,6 +46,7 @@ namespace HelloSignalR.Hubs
 
         public override Task OnConnected()
         {
+            Debug.WriteLine("conected");
             return base.OnConnected();
         }
     }
