@@ -18,8 +18,6 @@ namespace SignalRWithIOC
         {
             // Note that this is setting up Autofac for MVC. It is set up separately for Signal R in startup.cs (as an OWIN pipeline)
             var builder = new ContainerBuilder();
-            // Register your SignalR hubs.
-           Autofac.Integration.SignalR.RegistrationExtensions.RegisterHubs(builder, typeof(MvcApplication).Assembly);
             RegisterServices.RegisterCommonServices(builder);
 
             // Register MVC components. More here http://docs.autofac.org/en/latest/integration/mvc.html 
