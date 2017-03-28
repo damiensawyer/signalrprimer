@@ -24,35 +24,32 @@ namespace HelloSignalR
             // try this next? http://stackoverflow.com/a/29793864/494635
 
             var builder = new ContainerBuilder();
-            ////builder.RegisterType<LoggingPipelineModule>(); // see http://docs.autofac.org/en/latest/integration/owin.html for registering custom pipeline modules
-            //builder.RegisterType<IOCHub>().ExternallyOwned();
+            //builder.RegisterType<LoggingPipelineModule>(); // see http://docs.autofac.org/en/latest/integration/owin.html for registering custom pipeline modules
             var config = new HubConfiguration();
 
-            //builder.Register(i => config.Resolver.Resolve<IConnectionManager>().GetHubContext<IOCHub>()).ExternallyOwned();
 
-            //// Register your SignalR hubs.
             builder.RegisterType<NameService>().SingleInstance();
+            
+            // Register your SignalR hubs.
             builder.RegisterHubs(Assembly.GetExecutingAssembly());
             //// Set the dependency resolver to be Autofac.
             var container = builder.Build();
             config.Resolver = new AutofacDependencyResolver(container);
-            //Microsoft.AspNet.SignalR. .HelloSignalR.Startup.ConfigureSignalR(app, config);
-            //// OWIN SIGNALR SETUP:
 
             //// Register the Autofac middleware FIRST, then the standard SignalR middleware.
             //// This will add the Autofac middleware as well as the middleware
             //// registered in the container - ie LoggingPipelineModule
-            //app.UseAutofacMiddleware(container);
+            app.UseAutofacMiddleware(container);
+            app.MapSignalR("/signalr", config);
 
             //// HOWEVER.
             //// the Autofac Signal R doc says:
             //// To add custom HubPipeline modules, you have to get the HubPipeline
             //// from the dependency resolver, for example:
-            ////var hubPipeline = config.Resolver.Resolve<IHubPipeline>();config
-            ////hubPipeline.AddModule(new LoggingPipelineModule());
+            var hubPipeline = config.Resolver.Resolve<IHubPipeline>();
+            hubPipeline.AddModule(new LoggingPipelineModule());
             //// so - which one is it?? 
 
-            app.MapSignalR("/signalr", config);
         }
     }
 }

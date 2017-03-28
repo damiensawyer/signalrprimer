@@ -11,25 +11,16 @@ namespace HelloSignalR.Hubs
         private readonly NameService _nameService;
         private int i  = 0;
 
-        //public IOCHub()
-        //{
-        //    Task.Run(() =>
-        //    {
-        //        while (true)
-        //        {
-        //            this.Pulse();
-        //        }
-        //    });
-        //}
         public IOCHub(NameService nameService)
         {
             _nameService = nameService;
 
-            Task.Run(() =>
+            Task.Run(async () =>
             {
                 while (true)
                 {
                     this.Pulse();
+                    await Task.Delay(2000);
                 }
             });
         }
@@ -39,9 +30,10 @@ namespace HelloSignalR.Hubs
             return this._nameService.Name;
         }
 
-        public int Pulse()
+        public void Pulse()
         {
-            return i++;
+            i++;
+            Clients.All.Pulse(i);
         }
 
         public override Task OnConnected()

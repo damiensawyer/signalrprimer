@@ -21,6 +21,7 @@
             var Model = function () {
                 var self = this;
                 self.result = ko.observable('');
+                self.counter = ko.observable('');
             }
 
             Model.prototype = {
@@ -34,7 +35,9 @@
                 }.bind(this)
             };
             var model = new Model();
-            connection.client.Pulse = function (pulse) { this.result(pulse);}.bind(model);
+            connection.client.Pulse = function (pulse) {
+                this.counter(pulse);
+            }.bind(model);
             $.connection.hub.logging = true;
 
             $.connection.hub.start().done(function () {
@@ -57,7 +60,9 @@
     @Html.Partial("~/Views/Shared/Navigation.cshtml")
     <h2>Hub with IOC</h2>
     <div>
-        <strong>Value from server <span data-bind="text:result"></span></strong>
+        <p>Value from server <span data-bind="text:result"></span></p>
+        
+        <p>Counter from server <span data-bind="text:counter"></span></p>
     </div>
 </body>
 </html>
