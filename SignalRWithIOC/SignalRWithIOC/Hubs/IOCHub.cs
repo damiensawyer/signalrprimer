@@ -1,10 +1,9 @@
-﻿using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Threading.Tasks;
 using HelloSignalR.Services;
 using Microsoft.AspNet.SignalR;
 
-namespace HelloSignalR.Hubs
+namespace SignalRWithIOC.Hubs
 {
     public class IOCHub : Hub
     {

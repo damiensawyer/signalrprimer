@@ -7,7 +7,6 @@ using System.Web.Mvc;
 using System.Web.Routing;
 using Autofac;
 using Autofac.Integration.Mvc;
-using HelloSignalR.Hubs;
 using HelloSignalR.Services;
 using SignalRWithIOC.Classes;
 

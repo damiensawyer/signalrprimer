@@ -4,8 +4,8 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using HelloSignalR.Hubs;
 using Microsoft.AspNet.SignalR;
+using SignalRWithIOC.Hubs;
 
 namespace HelloSignalR.Services
 {
