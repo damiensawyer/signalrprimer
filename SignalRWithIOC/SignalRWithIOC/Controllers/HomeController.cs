@@ -11,9 +11,9 @@ namespace HelloSignalR.Controllers
     {
         private readonly INameService _nameService;
 
-        public HomeController()
+        public HomeController(NameService nameService)
         {
-            //_nameService = nameService;
+            _nameService = nameService;
         }
 
         public ActionResult Index()
