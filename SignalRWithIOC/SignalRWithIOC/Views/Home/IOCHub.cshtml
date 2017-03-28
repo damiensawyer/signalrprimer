@@ -48,7 +48,7 @@
 
             $.connection.hub.start().done(function () {
                 console.log('connected to SignalR');
-                var r = connection.server.getName();
+                var r = connection.server.showName();
                 r.done(function(result) {
                      this.result(result);
                 }.bind(model));

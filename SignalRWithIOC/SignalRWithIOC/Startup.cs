@@ -35,38 +35,50 @@ namespace HelloSignalR
             builder.RegisterType<LoggingPipelineModule>(); // see http://docs.autofac.org/en/latest/integration/owin.html for registering custom pipeline modules
             var config = new HubConfiguration();
 
-            // Services common with SignalR and MVC
-            //RegisterServices.RegisterCommonServices(builder);
             builder.RegisterType<NameService>().SingleInstance();
+
             Autofac.Integration.Mvc.RegistrationExtensions.RegisterControllers(builder, typeof(MvcApplication).Assembly);
             // Register SignalR Specific.
             builder.RegisterHubs(Assembly.GetExecutingAssembly());
 
+            //builder.RegisterType<IOCHub>().ExternallyOwned(); // SignalR hub registration
 
+            //// Register the Hub for DI (THIS IS THE MAGIC LINE)
+            //builder.Register(i => config.Resolver.Resolve<IConnectionManager>().GetHubContext<IOCHub, IIOCHub>()).ExternallyOwned();
 
-            
-            // Attempts to get HubContexts into services... so that they can send to clients. 
-            // http://stackoverflow.com/a/37913821
-            builder.Register((ctx, p) =>
-            config.Resolver.Resolve<IConnectionManager>() // this works... but wtf. Why can't I use ctx? 
-                    .GetHubContext<IOCHub>())
-                .Named<IHubContext>("IOCHub");
-
-            builder.RegisterType<NameService>().WithParameter(
-                new ResolvedParameter(
-                    (pi, ctx) => pi.ParameterType == typeof(IHubContext),
-                    (pi, ctx) => ctx.ResolveNamed<IHubContext>("IOCHub")
-                )
-            );
+            builder.RegisterType<AutofacDependencyResolver>().As<Microsoft.AspNet.SignalR.IDependencyResolver>().SingleInstance();
+            //builder.Register<AutofacDependencyResolver>(x => new AutofacDependencyResolver(builder.Build())).As<Microsoft.AspNet.SignalR.IDependencyResolver>();
+            builder.Register(context => context.Resolve<Microsoft.AspNet.SignalR.IDependencyResolver>()
+            .Resolve<IConnectionManager>().GetHubContext<IOCHub>())
+            .ExternallyOwned();
 
             var container = builder.Build();
-            config.Resolver = new AutofacDependencyResolver(container); // note, this is a different AutofacDependencyResolver to the one in global.asax. Different namespace
+            config.Resolver = container.Resolve<Microsoft.AspNet.SignalR.IDependencyResolver>();
 
+            // Attempts to get HubContexts into services... so that they can send to clients. 
+            // http://stackoverflow.com/a/37913821
+
+            // had this issue... 
+            https://github.com/autofac/Autofac.SignalR/issues/2
+
+                  //builder.Register((ctx, p) =>
+                  //ctx.Resolve<IConnectionManager>() // this works... but wtf. Why can't I use ctx? 
+                  //        ?.GetHubContext<IOCHub>())
+                  //    .Named<IHubContext>("IOCHub");
+
+            //builder.RegisterType<NameService>().WithParameter(
+            //    new ResolvedParameter(
+            //        (pi, ctx) => pi.ParameterType == typeof(IHubContext),
+            //        (pi, ctx) => ctx.ResolveNamed<IHubContext>("IOCHub")
+            //    )
+            //);
+
+            
+            //config.Resolver = new AutofacDependencyResolver(container); // note, this is a different AutofacDependencyResolver to the one in global.asax. Different namespace
+            app.MapSignalR("/signalr", config);
             app.UseAutofacMiddleware(container);
             app.UseAutofacMvc();
             
-            app.MapSignalR("/signalr", config);
-
             //// To add custom HubPipeline modules, you have to get the HubPipeline
             //// from the dependency resolver, for example:
 

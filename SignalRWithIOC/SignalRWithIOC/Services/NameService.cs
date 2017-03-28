@@ -10,7 +10,7 @@ namespace HelloSignalR.Services
         private int i = 0;
         public NameService(IHubContext hubContext)
         {
-            IHubContext hubContext1;
+             
             Task.Run(async () =>
             {
                 while (true)

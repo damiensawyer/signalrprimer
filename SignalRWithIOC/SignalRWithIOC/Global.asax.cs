@@ -17,13 +17,16 @@ namespace SignalRWithIOC
     {
         protected void Application_Start()
         {
-            //// Note that this is setting up Autofac for MVC. It is set up separately for Signal R in startup.cs (as an OWIN pipeline)
-            var builder = new ContainerBuilder();
-            //RegisterServices.RegisterCommonServices(builder);
+            // ok. This totally did my head in. We are using Signal R as well, resgistered in Startup.cs as
+            // part of the OWIN pipeline. 
+            // I 'think' that by using app.UseAutofacMvc() in that file, the registrations from there are included
+            // in the normal MVC pipeline and so can be used in Controller constructors etc.
 
+            var builder = new ContainerBuilder();
+            
             // Register MVC components. More here http://docs.autofac.org/en/latest/integration/mvc.html 
+            // Notice that we're not registering any services. They're being done in startup.cs and 'flow through' to here.
             builder.RegisterControllers(typeof(MvcApplication).Assembly);
-            RegistrationExtensions.RegisterHubs(builder, typeof(MvcApplication).Assembly);
             var container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));
 
