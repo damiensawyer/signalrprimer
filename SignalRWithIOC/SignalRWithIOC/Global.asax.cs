@@ -9,6 +9,7 @@ using Autofac;
 using Autofac.Integration.Mvc;
 using HelloSignalR.Hubs;
 using HelloSignalR.Services;
+using SignalRWithIOC.Classes;
 
 namespace SignalRWithIOC
 {
@@ -16,13 +17,12 @@ namespace SignalRWithIOC
     {
         protected void Application_Start()
         {
-
-            //To get Autofac integrated with SignalR you need to reference the SignalR integration NuGet package, register your hubs, and set the dependency resolver.
-            // See notes here on setting up AutoFac with SignalR
-
+            // Note that this is setting up Autofac for MVC. It is set up separately for Signal R in startup.cs (as an OWIN pipeline)
             var builder = new ContainerBuilder();
+            RegisterServices.RegisterCommonServices(builder);
+
+            // Register MVC components. More here http://docs.autofac.org/en/latest/integration/mvc.html 
             builder.RegisterControllers(typeof(MvcApplication).Assembly);
-            builder.RegisterType<NameService>();
 
             var container = builder.Build();
             DependencyResolver.SetResolver(new AutofacDependencyResolver(container));

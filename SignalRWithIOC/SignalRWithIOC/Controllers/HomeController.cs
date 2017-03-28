@@ -9,9 +9,9 @@ namespace HelloSignalR.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly NameService _nameService;
+        private readonly INameService _nameService;
 
-        public HomeController(NameService nameService)
+        public HomeController(INameService nameService)
         {
             _nameService = nameService;
         }
