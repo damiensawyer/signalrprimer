@@ -23,6 +23,7 @@
                 self.result = ko.observable('');
                 self.counter = ko.observable('');
                 self.servicePulse = ko.observable('');
+                self.controllerMessage = ko.observable('');
             }
 
             Model.prototype = {
@@ -42,6 +43,10 @@
 
             connection.client.ServicePulse = function (pulse) {
                 this.servicePulse(pulse);
+            }.bind(model);
+
+            connection.client.FromController = function (message) {
+                this.controllerMessage(message);
             }.bind(model);
 
             $.connection.hub.logging = true;
@@ -69,6 +74,7 @@
         <p>Value from server <span data-bind="text:result"></span></p>
         
         <p>Counter from server <span data-bind="text:counter"></span></p>
+        <p>Counter generated from in a controller that registers the service<span data-bind="text:controllerMessage"></span></p>
         <p>Service Pulse from server <span data-bind="text:servicePulse"></span></p>
     </div>
 </body>

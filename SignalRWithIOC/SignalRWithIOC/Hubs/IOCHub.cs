@@ -5,7 +5,7 @@ using Microsoft.AspNet.SignalR;
 
 namespace SignalRWithIOC.Hubs
 {
-    public class IOCHub : Hub, IIOCHub
+    public class IOCHub : Hub
     {
         private readonly NameService _nameService;
         private int i  = 0;
@@ -24,9 +24,9 @@ namespace SignalRWithIOC.Hubs
             });
         }
 
-        public Task<string> ShowName()
+        public string ShowName()
         {
-            return Task.FromResult(this._nameService.Name);
+            return this._nameService.Name;
         }
 
         public void Pulse()

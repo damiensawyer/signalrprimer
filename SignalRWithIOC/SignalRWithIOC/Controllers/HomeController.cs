@@ -23,6 +23,7 @@ namespace HelloSignalR.Controllers
 
         public ActionResult IOCHub()
         {
+            _nameService.Clients.All.FromController("Controller Accessed");
             return View();
         }
     }

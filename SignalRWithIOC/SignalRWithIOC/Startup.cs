@@ -31,11 +31,16 @@ namespace HelloSignalR
             //didn't get working
             // try this next? http://stackoverflow.com/a/29793864/494635
 
+
+
+            //dmaien - read teh question and try registring the new HubConfiguration().... 
+
             var builder = new ContainerBuilder();
             builder.RegisterType<LoggingPipelineModule>(); // see http://docs.autofac.org/en/latest/integration/owin.html for registering custom pipeline modules
-            var config = new HubConfiguration();
+            var hubConfiguration = new HubConfiguration();
 
             builder.RegisterType<NameService>().SingleInstance();
+            builder.RegisterInstance(hubConfiguration);
 
             Autofac.Integration.Mvc.RegistrationExtensions.RegisterControllers(builder, typeof(MvcApplication).Assembly);
             // Register SignalR Specific.
@@ -47,13 +52,10 @@ namespace HelloSignalR
             //builder.Register(i => config.Resolver.Resolve<IConnectionManager>().GetHubContext<IOCHub, IIOCHub>()).ExternallyOwned();
 
             builder.RegisterType<AutofacDependencyResolver>().As<Microsoft.AspNet.SignalR.IDependencyResolver>().SingleInstance();
-            //builder.Register<AutofacDependencyResolver>(x => new AutofacDependencyResolver(builder.Build())).As<Microsoft.AspNet.SignalR.IDependencyResolver>();
-            builder.Register(context => context.Resolve<Microsoft.AspNet.SignalR.IDependencyResolver>()
-            .Resolve<IConnectionManager>().GetHubContext<IOCHub>())
-            .ExternallyOwned();
+           // builder.Register(context => context.Resolve<Microsoft.AspNet.SignalR.IDependencyResolver>().Resolve<IConnectionManager>()).SingleInstance();
 
             var container = builder.Build();
-            config.Resolver = container.Resolve<Microsoft.AspNet.SignalR.IDependencyResolver>();
+            hubConfiguration.Resolver = container.Resolve<Microsoft.AspNet.SignalR.IDependencyResolver>();
 
             // Attempts to get HubContexts into services... so that they can send to clients. 
             // http://stackoverflow.com/a/37913821
@@ -75,15 +77,15 @@ namespace HelloSignalR
 
             
             //config.Resolver = new AutofacDependencyResolver(container); // note, this is a different AutofacDependencyResolver to the one in global.asax. Different namespace
-            app.MapSignalR("/signalr", config);
+            app.MapSignalR("/signalr", hubConfiguration);
             app.UseAutofacMiddleware(container);
             app.UseAutofacMvc();
             
             //// To add custom HubPipeline modules, you have to get the HubPipeline
             //// from the dependency resolver, for example:
 
-            var hubPipeline = config.Resolver.Resolve<IHubPipeline>();
-            hubPipeline.AddModule(config.Resolver.Resolve<LoggingPipelineModule>());
+            var hubPipeline = hubConfiguration.Resolver.Resolve<IHubPipeline>();
+            hubPipeline.AddModule(hubConfiguration.Resolver.Resolve<LoggingPipelineModule>());
         }
     }
 }
